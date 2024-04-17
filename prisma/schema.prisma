@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // Change "mysql" to "postgres '-ql", "sqlserver" or "sqlite" depending on your database
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+enum Role {
+  user
+  admin
+  operator
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  username       String   @unique
+  name           String
+  email          String   @unique
+  address        String?
+  password       String
+  role           Role     @default(user)
+  remember_token String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  Collection Collection[]
+  Review     Review[]
+  Lending    Lending[]
+}
+
+model Book {
+  id               Int       @id @default(autoincrement())
+  title            String
+  author           String
+  cover            String
+  publisher        String
+  publication_year DateTime?
+  description      String
+  pdf              String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  Collection   Collection[]
+  Review       Review[]
+  BookCategory BookCategory[]
+  Lending      Lending[]
+}
+
+model Collection {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([bookId])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    Int
+  review    String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([bookId])
+}
+
+model Category {
+  id           Int            @id @default(autoincrement())
+  name         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  BookCategory BookCategory[]
+}
+
+model BookCategory {
+  id         Int      @id @default(autoincrement())
+  book       Book     @relation(fields: [bookId], references: [id])
+  bookId     Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([bookId])
+  @@index([categoryId])
+}
+
+model Lending {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    Int
+  lendingAt DateTime @default(now())
+  returnAt  DateTime
+  status    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([bookId])
+}
