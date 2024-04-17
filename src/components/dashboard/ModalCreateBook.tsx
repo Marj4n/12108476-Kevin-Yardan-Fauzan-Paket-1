@@ -33,7 +33,7 @@ const ModalCreateBook = () => {
         title: data.title,
         author: data.author,
         publisher: data.publisher,
-        published: data.published,
+        publication_year: data.publication_year,
         description: data.description,
         pdf: data.pdf,
         cover: data.cover,
@@ -155,16 +155,16 @@ const ModalCreateBook = () => {
 
             <FormField
               control={form.control}
-              name="published"
+              name="publication_year"
               render={({ field }) => (
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label className="text-right">Published</Label>
+                  <Label className="text-right">Publication Year</Label>
                   <Input
                     type="date"
                     onChange={field.onChange}
                     defaultValue={field.value}
                     className="w-[150px]"
-                    placeholder="Enter published"
+                    placeholder="Enter publication year"
                     required
                   />
                 </div>

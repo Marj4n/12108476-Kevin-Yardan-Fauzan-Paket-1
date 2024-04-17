@@ -5,7 +5,7 @@ import { CardDescription, CardTitle } from "@/components/ui/card";
 import ListBook from "./ListBook";
 
 export const metadata = {
-  title: "Borrow | Online Library",
+  title: "Online Library | Borrow",
 };
 
 export default async function BorrowPage() {

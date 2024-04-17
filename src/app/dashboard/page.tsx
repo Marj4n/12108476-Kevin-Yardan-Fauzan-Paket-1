@@ -5,7 +5,7 @@ import { CardDescription, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
 export const metadata = {
-  title: "Dashboard | Online Library",
+  title: "Online Library | Dashboard",
 };
 
 export default async function DashboardPage() {

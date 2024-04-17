@@ -5,7 +5,7 @@ import { CardDescription, CardTitle } from "@/components/ui/card";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export const metadata = {
-  title: "Book Dashboard | Online Library",
+  title: "Online Library | Book Dashboard",
 };
 
 export default async function BookPage() {
