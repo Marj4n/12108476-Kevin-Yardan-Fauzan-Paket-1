@@ -11,6 +11,7 @@ import {
 import UserAvatar from "./UserAvatar";
 import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 type Props = {
   user: {
@@ -23,6 +24,7 @@ type Props = {
 };
 
 const UserAccountNav = ({ user }: Props) => {
+  const router = useRouter();
   useEffect(() => {
     console.log(user);
   }, [user]);
@@ -52,6 +54,20 @@ const UserAccountNav = ({ user }: Props) => {
             )}
           </div>
         </div>
+        <DropdownMenuSeparator />
+        {user.role === "user" && (
+          <DropdownMenuItem
+            onSelect={(event) => {
+              // redirect to my books page
+              event.preventDefault();
+
+              router.push("/my-books");
+            }}
+            className="text-black cursor-pointer"
+          >
+            My Books
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator className="sm:hidden" />
         <DropdownMenuItem
           onSelect={(event) => {

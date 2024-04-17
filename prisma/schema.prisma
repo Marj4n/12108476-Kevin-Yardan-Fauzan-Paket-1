@@ -109,7 +109,7 @@ model Lending {
   book      Book     @relation(fields: [bookId], references: [id])
   bookId    Int
   lendingAt DateTime @default(now())
-  returnAt  DateTime
+  returnAt  DateTime?
   status    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

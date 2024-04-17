@@ -8,80 +8,61 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
-import { User } from "@prisma/client";
-import { useRouter } from "next/navigation";
+import { Category } from "@prisma/client";
 import Link from "next/link";
 
 const handleDelete = async (userId: number) => {
   try {
-    await axios.delete(`/api/user?id=${userId}`);
+    await axios.delete(`/api/category?id=${userId}`);
 
     setTimeout(() => {
       location.reload();
     }, 1500);
   } catch (error) {
-    console.error("Error deleting user:", error);
+    console.error("Error deleting category:", error);
   }
 };
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "username",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Username
+          Category
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
   },
   {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "address",
-    header: "Address",
-  },
-  {
-    accessorKey: "role",
-    header: "Role",
-  },
-  {
     accessorKey: "createdAt",
     header: "Created At",
     cell: ({ row }) => {
-      const book = row.original;
-      return new Date(book.createdAt).toLocaleDateString();
+      const category = row.original;
+      return new Date(category.createdAt).toLocaleDateString();
     },
   },
   {
     accessorKey: "updatedAt",
     header: "Updated At",
     cell: ({ row }) => {
-      const book = row.original;
-      return new Date(book.updatedAt).toLocaleDateString();
+      const category = row.original;
+      return new Date(category.updatedAt).toLocaleDateString();
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const user = row.original;
+      const category = row.original;
       const { toast } = useToast();
-      const router = useRouter();
 
       return (
         <DropdownMenu>
@@ -94,15 +75,15 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.username!)}
+              onClick={() => navigator.clipboard.writeText(category.name!)}
             >
               <Copy className="mr-2 h-4 w-4" />
-              Username
+              Title
             </DropdownMenuItem>
             <DropdownMenuItem
               className="font-medium text-red-500"
               onClick={() => {
-                handleDelete(user.id);
+                handleDelete(category.id);
                 toast({
                   title: "Success",
                   description: "User deleted successfully",
@@ -113,7 +94,17 @@ export const columns: ColumnDef<User>[] = [
               Delete
             </DropdownMenuItem>
             <DropdownMenuItem className="font-medium text-blue-500">
-              <Link href={`/dashboard/user/update/${user.id}`}>Update</Link>
+              <Link href={`/dashboard/category/update/${category.id}`}>
+                Update
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Link
+                className="h-8 w-8 p-0"
+                href={`/dashboard/category/${category.id}`}
+              >
+                Borrowed
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

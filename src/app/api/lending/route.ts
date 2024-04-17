@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
   }
   try {
     const body = await req.json();
-    const { userId, bookId, returnAt } = lendingCreationSchema.parse(body);
+    const { userId, bookId } = lendingCreationSchema.parse(body);
 
     const user = await prisma.user.findUnique({
       where: {
@@ -113,10 +113,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // and not returned yet
     const existingBorrow = await prisma.lending.findFirst({
       where: {
         userId,
         bookId,
+        status: false,
       },
     });
 
@@ -135,7 +137,6 @@ export async function POST(req: NextRequest) {
       data: {
         userId,
         bookId,
-        returnAt,
       },
     });
 
@@ -151,6 +152,69 @@ export async function POST(req: NextRequest) {
     console.error("Error creating borrow:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred.", message: error },
+      {
+        status: 500,
+      }
+    );
+  }
+}
+
+// make the return of the book
+export async function PUT(req: NextRequest) {
+  if (!isLogin(req)) {
+    return NextResponse.json(
+      {
+        error: "Unauthorized",
+      },
+      {
+        status: 401,
+      }
+    );
+  }
+  try {
+    const { searchParams } = new URL(req.url);
+    const borrowId = searchParams.get("id");
+
+    const borrow = await prisma.lending.findUnique({
+      where: {
+        id: Number(borrowId),
+      },
+    });
+
+    if (!borrow) {
+      return NextResponse.json(
+        {
+          error: "Borrow not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
+    await prisma.lending.update({
+      where: {
+        id: Number(borrowId),
+      },
+      data: {
+        status: true,
+        returnAt: new Date(),
+      },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Book returned.",
+      },
+      {
+        status: 200,
+      }
+    );
+  } catch (error) {
+    console.error("Error updating borrow:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred." },
       {
         status: 500,
       }

@@ -19,25 +19,45 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormField } from "../ui/form";
 import { ToastAction } from "@radix-ui/react-toast";
 import { bookCreationSchema } from "@/schemas/book";
+import { Category } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { SelectTrigger, SelectValue } from "@radix-ui/react-select";
+import { Select, SelectContent, SelectGroup, SelectItem } from "../ui/select";
 
 const ModalCreateBook = () => {
   const { toast } = useToast();
+  const [categories, setCategories] = useState<Category[]>([]);
   const form = useForm<z.infer<typeof bookCreationSchema>>({
     resolver: zodResolver(bookCreationSchema),
   });
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("/api/category");
+        setCategories(response.data.categories);
+        console.log(categories);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   function onSubmit(data: z.infer<typeof bookCreationSchema>) {
     try {
-      console.log(data);
-      axios.post("/api/book", {
+      const reponse = axios.post("/api/book", {
         title: data.title,
         author: data.author,
         publisher: data.publisher,
-        publication_year: data.publication_year,
+        publication_year: new Date(data.publication_year).toISOString(),
         description: data.description,
         pdf: data.pdf,
         cover: data.cover,
       });
+
+      console.log(reponse);
 
       toast({
         title: "Book created successfully.",

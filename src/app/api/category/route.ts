@@ -1,21 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isLogin } from "@/lib/utils";
-import { bookCreationSchema } from "@/schemas/book";
+import { categoryCreationSchema } from "@/schemas/category";
 
 export async function GET(req: NextRequest) {
   try {
-    const books = await prisma.book.findMany();
+    const categories = await prisma.category.findMany();
     return NextResponse.json(
       {
-        books,
+        categories,
       },
       {
         status: 200,
       }
     );
   } catch (error) {
-    console.error("Error getting books:", error);
+    console.error("Error getting categories:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred.", message: error },
       {
@@ -26,40 +26,36 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  // if (!isLogin(req)) {
+  //   return NextResponse.json(
+  //     {
+  //       error: "Unauthorized",
+  //     },
+  //     {
+  //       status: 401,
+  //     }
+  //   );
+  // }
   try {
     const body = await req.json();
-    const {
-      title,
-      author,
-      publisher,
-      publication_year,
-      description,
-      pdf,
-      cover,
-    } = bookCreationSchema.parse(body);
+    const { name } = categoryCreationSchema.parse(body);
 
-    const book = await prisma.book.create({
+    const category = await prisma.category.create({
       data: {
-        title,
-        author,
-        publisher,
-        publication_year,
-        description,
-        pdf,
-        cover,
+        name,
       },
     });
 
     return NextResponse.json(
       {
-        book,
+        category,
       },
       {
         status: 201,
       }
     );
   } catch (error) {
-    console.error("Error creating book:", error);
+    console.error("Error creating :", error);
     return NextResponse.json(
       { error: "An unexpected error occurred.", message: error },
       {
@@ -83,27 +79,19 @@ export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
     const { searchParams } = new URL(req.url);
-    const bookId = searchParams.get("id");
-    const {
-      title,
-      author,
-      publisher,
-      publication_year,
-      description,
-      pdf,
-      cover,
-    } = bookCreationSchema.parse(body);
+    const categoryId = searchParams.get("id");
+    const { name } = categoryCreationSchema.parse(body);
 
-    const book = prisma.book.findUnique({
+    const category = prisma.category.findUnique({
       where: {
-        id: Number(bookId),
+        id: Number(categoryId),
       },
     });
 
-    if (!book) {
+    if (!category) {
       return NextResponse.json(
         {
-          error: "Book not found.",
+          error: "Category not found.",
         },
         {
           status: 404,
@@ -111,32 +99,26 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    await prisma.book.update({
+    await prisma.category.update({
       where: {
-        id: Number(bookId),
+        id: Number(categoryId),
       },
       data: {
-        title,
-        author,
-        publisher,
-        publication_year,
-        description,
-        pdf,
-        cover,
+        name,
       },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Book updated.",
+        message: "Category updated.",
       },
       {
         status: 200,
       }
     );
   } catch (error) {
-    console.error("Error updating book:", error);
+    console.error("Error updating Category:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred.", message: error },
       {
@@ -159,17 +141,17 @@ export async function DELETE(req: NextRequest) {
   }
   try {
     const { searchParams } = new URL(req.url);
-    const bookId = searchParams.get("id");
-    const book = await prisma.book.findUnique({
+    const categoryId = searchParams.get("id");
+    const category = await prisma.category.findUnique({
       where: {
-        id: Number(bookId),
+        id: Number(categoryId),
       },
     });
 
-    if (!book) {
+    if (!category) {
       return NextResponse.json(
         {
-          error: "Book not found.",
+          error: "Category not found.",
         },
         {
           status: 404,
@@ -177,23 +159,23 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    await prisma.book.delete({
+    await prisma.category.delete({
       where: {
-        id: Number(bookId),
+        id: Number(categoryId),
       },
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Book deleted.",
+        message: "Category deleted.",
       },
       {
         status: 200,
       }
     );
   } catch (error) {
-    console.error("Error deleting book:", error);
+    console.error("Error deleting category:", error);
     return NextResponse.json(
       { error: "An unexpected error occurred.", message: error },
       {

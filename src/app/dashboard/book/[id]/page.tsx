@@ -1,4 +1,6 @@
 "use client";
+import { ExportLendingButton } from "@/components/dashboard/ExportButton";
+import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
@@ -12,7 +14,7 @@ interface Borrow {
   id: number;
   userId: number;
   bookId: number;
-  borrowAt: string;
+  lendingAt: string;
   returnAt: string;
   status: boolean;
   createdAt: string;
@@ -43,7 +45,7 @@ const BorrowedPage: React.FC<BorrowedPageProps> = ({ params }) => {
   useEffect(() => {
     async function fetchBorrows() {
       try {
-        const response = await axios.get(`/api/borrow/?bookId=${id}`);
+        const response = await axios.get(`/api/lending/?bookId=${id}`);
 
         console.log(response.data.borrow);
         setBookBorrows(response.data.borrow);
@@ -53,7 +55,6 @@ const BorrowedPage: React.FC<BorrowedPageProps> = ({ params }) => {
     }
 
     fetchBorrows();
-    
   }, [id]);
 
   if (!id) {
@@ -67,14 +68,49 @@ const BorrowedPage: React.FC<BorrowedPageProps> = ({ params }) => {
   return (
     <div>
       <h1>Borrowed Books</h1>
-      {bookBorrows.map((borrow) => (
-        <div key={borrow.id}>
-          <h2>{borrow.book.title}</h2>
-          <p>Borrowed by: {borrow.user.username}</p>
-          <p>Borrowed at: {new Date(borrow.borrowAt).toLocaleDateString()}</p>
-          <p>Return at: {new Date(borrow.returnAt).toLocaleDateString()}</p>
-        </div>
-      ))}
+      <ExportLendingButton />
+      <ul>
+        {bookBorrows.map((borrow) => (
+          <li key={borrow.id} className="border p-4 my-4">
+            <h2>{borrow.book.title}</h2>
+            <p>Borrowed by: {borrow.user.username}</p>
+            <p>
+              Borrowed at: {new Date(borrow.lendingAt).toLocaleDateString()}
+            </p>
+            {/* check if return is null then not return yet */}
+            <p>
+              Return at:{" "}
+              {borrow.returnAt
+                ? new Date(borrow.returnAt).toLocaleDateString()
+                : "Not returned yet"}
+            </p>
+            {!borrow.returnAt && (
+              <Button
+                onClick={async () => {
+                  try {
+                    await axios.put(`/api/lending/?id=${borrow.id}`);
+                    const updatedBorrows = bookBorrows.map((b) => {
+                      if (b.id === borrow.id) {
+                        return {
+                          ...b,
+                          returnAt: new Date().toISOString(),
+                        };
+                      }
+                      return b;
+                    });
+                    setBookBorrows(updatedBorrows);
+                  } catch (error) {
+                    console.error("Error returning book:", error);
+                  }
+                }}
+                variant="outline"
+              >
+                Return
+              </Button>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

@@ -33,8 +33,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import { Grid2X2 } from "lucide-react";
-import ModalCreateBook from "@/components/dashboard/ModalCreateBook";
-import { ExportBookButton } from "@/components/dashboard/ExportButton";
+import { ExportCategoryButton } from "@/components/dashboard/ExportButton";
+import ModalCreateCategory from "@/components/dashboard/ModalCreateCategory";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -75,10 +75,10 @@ export function DataTable<TData, TValue>({
     <div>
       <div className="flex items-center py-4">
         <Input
-          placeholder="Filter title..."
-          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter name category..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="max-w-sm dark:border-gray-700 shadow w-full "
         />
@@ -92,7 +92,7 @@ export function DataTable<TData, TValue>({
               <span className="sm:block xs:hidden">Columns</span>
             </Button>
           </DropdownMenuTrigger>
-          <ExportBookButton />
+          <ExportCategoryButton />
           <DropdownMenuContent align="center">
             {table
               .getAllColumns()
@@ -112,7 +112,7 @@ export function DataTable<TData, TValue>({
                 );
               })}
           </DropdownMenuContent>
-          <ModalCreateBook />
+          <ModalCreateCategory />
         </DropdownMenu>
       </div>
 

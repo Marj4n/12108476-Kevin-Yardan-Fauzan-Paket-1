@@ -9,14 +9,14 @@ const UpdatePage = ({ params }: { params: { id: number } }) => {
     <main className="p-8 mx-auto max-w-7xl">
       <div className="items-start flex flex-col">
         <CardTitle className="text-3xl font-bold tracking-tight xs:hidden sm:block">
-          Update user
+          Update book
         </CardTitle>
         <CardDescription className="xs:hidden sm:block">
-          Update user's information.
+          Update book's information.
         </CardDescription>
       </div>
       <div className="container mx-auto py-10 !px-0">
-        <UpdateForm userId={id} />
+        <UpdateForm bookId={id} />
       </div>
     </main>
   );

@@ -59,12 +59,12 @@ const ListBook = () => {
               className="w-full h-40 object-cover"
             />
             <div className="p-4 justify-between">
-              <h2 className="text-lg font-semibold">{book.title}</h2>
-              <p className="text-sm text-gray-600 mb-2">by {book.author}</p>
-              <p className="text-sm text-gray-600 mb-2">
-                Published: {!book.published}
+              <h2 className="text-lg text-black font-semibold">{book.title}</h2>
+              <p className="text-sm text-black mb-2">by {book.author}</p>
+              <p className="text-sm text-black mb-2">
+                Published: {!book.publication_year}
               </p>
-              <p className="text-sm">{book.description}</p>
+              <p className="text-sm text-black">{book.description}</p>
               <div className="mt-4 space-x-4">
                 <Link href={book.pdf} className="text-blue-500 hover:underline">
                   Read more
@@ -83,14 +83,11 @@ const ListBook = () => {
                     <AlertDialogFooter>
                       <AlertDialogCancel>No</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => {
+                        onClick={async () => {
                           try {
-                            axios.post("/api/borrow", {
+                            await axios.post("/api/lending", {
                               bookId: Number(book.id),
                               userId: Number(user.id),
-                              returnAt: new Date(
-                                Date.now() + 2 * 24 * 60 * 60 * 1000
-                              ),
                             });
                             toast({
                               title: "Book borrowed",
@@ -99,7 +96,7 @@ const ListBook = () => {
                           } catch (error) {
                             console.error("Error borrowing book:", error);
                             toast({
-                              title: "Error borrowing book",
+                              title: "Book already borrowed",
                               variant: "destructive",
                             });
                           }
@@ -110,6 +107,34 @@ const ListBook = () => {
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
+
+                <Button
+                  onClick={async () => {
+                    try {
+                      await axios.post("/api/collection", {
+                        bookId: Number(book.id),
+                        userId: Number(user.id),
+                      });
+                      toast({
+                        title: "Book added to collection",
+                        variant: "success",
+                      });
+                    } catch (error) {
+                      console.error("Error adding book to collection:", error);
+                      toast({
+                        title: "Book already added to collection",
+                        variant: "destructive",
+                      });
+                    }
+                  }}
+                  variant="secondary"
+                >
+                  Add to collection
+                </Button>
+
+                <Button variant="secondary">
+                  <Link href={`/borrow/${book.id}`}>Review</Link>
+                </Button>
               </div>
             </div>
           </div>

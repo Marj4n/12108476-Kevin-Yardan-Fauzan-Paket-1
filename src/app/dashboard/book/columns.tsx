@@ -8,7 +8,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import axios from "axios";
@@ -53,16 +52,25 @@ export const columns: ColumnDef<Book>[] = [
     header: "Publisher",
   },
   {
-    accessorKey: "published",
+    accessorKey: "publication_year",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Published
+          Publication Year
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
+      );
+    },
+    cell: ({ row }) => {
+      const book = row.original;
+      // turn to year only
+      return (
+        <div className="ml-14">
+          {String(book.publication_year)?.split("-")[0]}
+        </div>
       );
     },
   },
@@ -92,6 +100,22 @@ export const columns: ColumnDef<Book>[] = [
           <Button variant="ghost">View PDF</Button>
         </a>
       );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Created At",
+    cell: ({ row }) => {
+      const book = row.original;
+      return new Date(book.createdAt).toLocaleDateString();
+    },
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "Updated At",
+    cell: ({ row }) => {
+      const book = row.original;
+      return new Date(book.updatedAt).toLocaleDateString();
     },
   },
   {
@@ -128,6 +152,9 @@ export const columns: ColumnDef<Book>[] = [
               }}
             >
               Delete
+            </DropdownMenuItem>
+            <DropdownMenuItem className="font-medium text-blue-500">
+              <Link href={`/dashboard/book/update/${book.id}`}>Update</Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Link className="h-8 w-8 p-0" href={`/dashboard/book/${book.id}`}>
