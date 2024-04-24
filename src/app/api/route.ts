@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  console.log("GET API", session);
   return NextResponse.json({
     authenticated: !!session,
     massage: "Go to `api/hello` for more information.",

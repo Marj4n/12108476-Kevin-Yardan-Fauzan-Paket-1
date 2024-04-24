@@ -40,6 +40,22 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { userId, bookId } = collectionCreationSchema.parse(body);
 
+    const existingCollection = await prisma.collection.findFirst({
+      where: {
+        userId,
+        bookId,
+      },
+    });
+
+    if (existingCollection) {
+      return NextResponse.json(
+        { error: "Book is already in the collection" },
+        {
+          status: 400,
+        }
+      );
+    }
+
     const collection = await prisma.collection.create({
       data: {
         userId,

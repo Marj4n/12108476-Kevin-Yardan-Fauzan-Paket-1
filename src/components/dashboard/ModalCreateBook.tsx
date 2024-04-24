@@ -21,8 +21,14 @@ import { ToastAction } from "@radix-ui/react-toast";
 import { bookCreationSchema } from "@/schemas/book";
 import { Category } from "@prisma/client";
 import { useEffect, useState } from "react";
-import { SelectTrigger, SelectValue } from "@radix-ui/react-select";
-import { Select, SelectContent, SelectGroup, SelectItem } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 const ModalCreateBook = () => {
   const { toast } = useToast();
@@ -36,7 +42,6 @@ const ModalCreateBook = () => {
       try {
         const response = await axios.get("/api/category");
         setCategories(response.data.categories);
-        console.log(categories);
       } catch (error) {
         console.error("Error fetching categories:", error);
       }
@@ -55,6 +60,7 @@ const ModalCreateBook = () => {
         description: data.description,
         pdf: data.pdf,
         cover: data.cover,
+        categoryId: data.categoryId,
       });
 
       console.log(reponse);
@@ -152,6 +158,34 @@ const ModalCreateBook = () => {
                     placeholder="Enter author"
                     required
                   />
+                </div>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Category</Label>
+                  <Select
+                    defaultValue={field.value ? field.value.toString() : ""}
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                  >
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select a Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem
+                          key={category.id}
+                          value={category.id.toString()}
+                        >
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             />

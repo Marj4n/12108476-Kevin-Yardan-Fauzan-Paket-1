@@ -1,9 +1,17 @@
 import { CardDescription, CardTitle } from "@/components/ui/card";
 import React from "react";
 import { UpdateForm } from "./form";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 
-const UpdatePage = ({ params }: { params: { id: number } }) => {
+const UpdatePage = async ({ params }: { params: { id: number } }) => {
   const { id } = params;
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
+  if (user?.role !== "admin" && user?.role !== "operator") {
+    return redirect("/");
+  }
 
   return (
     <main className="p-8 mx-auto max-w-7xl">

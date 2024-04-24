@@ -8,13 +8,15 @@ export const bookCreationSchema = z.object({
   description: z.string(),
   pdf: z.string(),
   cover: z.string(),
+  categoryId: z.number(),
 });
 
 export const bookUpdateSchema = z.object({
   title: z.string().optional(),
-  email: z.string().optional(),
-  address: z.string().optional(),
-  username: z.string().optional(),
-  password: z.string().optional(),
-  role: z.enum(["user", "admin", "operator"]).optional(),
+  author: z.string().optional(),
+  publisher: z.string().optional(),
+  publication_year: z.string().optional(),
+  description: z.string().optional(),
+  pdf: z.string().optional(),
+  cover: z.string().optional(),
 });

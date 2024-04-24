@@ -65,7 +65,7 @@ const UserAccountNav = ({ user }: Props) => {
             }}
             className="text-black cursor-pointer"
           >
-            My Books
+            My Collection
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator className="sm:hidden" />

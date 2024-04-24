@@ -1,14 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isLogin } from "@/lib/utils";
-import { bookCreationSchema } from "@/schemas/book";
+import { bookCreationSchema, bookUpdateSchema } from "@/schemas/book";
 
 export async function GET(req: NextRequest) {
   try {
-    const books = await prisma.book.findMany();
+    const books = await prisma.book.findMany({
+      include: {
+        BookCategory: {
+          select: {
+            category: {
+              select: {
+                name: true, // Select only the category name
+              },
+            },
+          },
+          take: 1, // Take only one category
+        },
+      },
+    });
+
+    const booksWithCategoryNames = await Promise.all(
+      books.map(async (book) => {
+        const category =
+          book.BookCategory.length > 0
+            ? book.BookCategory[0].category.name
+            : null;
+
+        const lending = await prisma.lending.findFirst({
+          where: {
+            bookId: book.id,
+            returnAt: null,
+          },
+        });
+
+        const isLending = !!lending; // Convert lending to boolean
+
+        return {
+          ...book,
+          category,
+          isLending,
+        };
+      })
+    );
+
     return NextResponse.json(
       {
-        books,
+        books: booksWithCategoryNames,
       },
       {
         status: 200,
@@ -36,8 +74,29 @@ export async function POST(req: NextRequest) {
       description,
       pdf,
       cover,
+      categoryId,
     } = bookCreationSchema.parse(body);
 
+    // Periksa apakah ID kategori yang diberikan ada dalam database
+    const existingCategory = await prisma.category.findUnique({
+      where: {
+        id: categoryId,
+      },
+    });
+
+    // Jika ID kategori tidak ditemukan, beri respons dengan status 400 (Bad Request)
+    if (!existingCategory) {
+      return NextResponse.json(
+        {
+          error: "Category ID not found.",
+        },
+        {
+          status: 400,
+        }
+      );
+    }
+
+    // Buat buku baru dan hubungkan dengan kategori yang sudah ada berdasarkan ID
     const book = await prisma.book.create({
       data: {
         title,
@@ -47,6 +106,14 @@ export async function POST(req: NextRequest) {
         description,
         pdf,
         cover,
+        BookCategory: {
+          create: {
+            category: { connect: { id: categoryId } }, // Hubungkan dengan kategori berdasarkan ID
+          },
+        },
+      },
+      include: {
+        BookCategory: true, // Sertakan data kategori dalam respons
       },
     });
 
@@ -92,9 +159,9 @@ export async function PUT(req: NextRequest) {
       description,
       pdf,
       cover,
-    } = bookCreationSchema.parse(body);
+    } = bookUpdateSchema.parse(body);
 
-    const book = prisma.book.findUnique({
+    const book = await prisma.book.findUnique({
       where: {
         id: Number(bookId),
       },
@@ -111,6 +178,11 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    // Convert publication_year to ISO-8601 DateTime format
+    const formattedPublicationYear = publication_year
+      ? new Date(publication_year).toISOString()
+      : "";
+
     await prisma.book.update({
       where: {
         id: Number(bookId),
@@ -119,7 +191,7 @@ export async function PUT(req: NextRequest) {
         title,
         author,
         publisher,
-        publication_year,
+        publication_year: formattedPublicationYear,
         description,
         pdf,
         cover,
@@ -166,6 +238,24 @@ export async function DELETE(req: NextRequest) {
       },
     });
 
+    const bookCategory = await prisma.bookCategory.findFirst({
+      where: {
+        bookId: Number(bookId),
+      },
+    });
+
+    const bookLending = await prisma.lending.findFirst({
+      where: {
+        bookId: Number(bookId),
+      },
+    });
+
+    const bookCollection = await prisma.collection.findFirst({
+      where: {
+        bookId: Number(bookId),
+      },
+    });
+
     if (!book) {
       return NextResponse.json(
         {
@@ -175,6 +265,31 @@ export async function DELETE(req: NextRequest) {
           status: 404,
         }
       );
+    }
+
+    // delete all related data
+    if (bookCategory) {
+      await prisma.bookCategory.delete({
+        where: {
+          id: bookCategory.id,
+        },
+      });
+    }
+
+    if (bookLending) {
+      await prisma.lending.delete({
+        where: {
+          id: bookLending.id,
+        },
+      });
+    }
+
+    if (bookCollection) {
+      await prisma.collection.delete({
+        where: {
+          id: bookCollection.id,
+        },
+      });
     }
 
     await prisma.book.delete({

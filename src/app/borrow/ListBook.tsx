@@ -17,9 +17,14 @@ import { Button } from "@/components/ui/button";
 import axios from "axios";
 import { useToast } from "@/components/ui/use-toast";
 
+interface BookWithLending extends Book {
+  isLending: boolean;
+}
+
 const ListBook = () => {
   const { toast } = useToast();
-  const [books, setBooks] = useState<Book[]>([]);
+
+  const [books, setBooks] = useState<BookWithLending[]>([]);
   const [user, setUser] = useState<any>();
 
   useEffect(() => {
@@ -36,6 +41,7 @@ const ListBook = () => {
         }
         const data = await response.json();
         setBooks(data.books);
+        console.log(data.books);
       } catch (error) {
         console.error(error);
       }
@@ -56,7 +62,7 @@ const ListBook = () => {
             <img
               src={book.cover}
               alt={book.title}
-              className="w-full h-40 object-cover"
+              className="w-full h-80 object-cover"
             />
             <div className="p-4 justify-between">
               <h2 className="text-lg text-black font-semibold">{book.title}</h2>
@@ -72,7 +78,13 @@ const ListBook = () => {
 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="secondary">Borrow</Button>
+                    {book.isLending ? (
+                      <Button variant="secondary" disabled>
+                        Borrowed
+                      </Button>
+                    ) : (
+                      <Button variant="secondary">Borrow</Button>
+                    )}
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
@@ -94,7 +106,6 @@ const ListBook = () => {
                               variant: "success",
                             });
                           } catch (error) {
-                            console.error("Error borrowing book:", error);
                             toast({
                               title: "Book already borrowed",
                               variant: "destructive",
@@ -120,7 +131,6 @@ const ListBook = () => {
                         variant: "success",
                       });
                     } catch (error) {
-                      console.error("Error adding book to collection:", error);
                       toast({
                         title: "Book already added to collection",
                         variant: "destructive",

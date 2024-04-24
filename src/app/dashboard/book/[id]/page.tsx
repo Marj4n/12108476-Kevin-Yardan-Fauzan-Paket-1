@@ -46,8 +46,6 @@ const BorrowedPage: React.FC<BorrowedPageProps> = ({ params }) => {
     async function fetchBorrows() {
       try {
         const response = await axios.get(`/api/lending/?bookId=${id}`);
-
-        console.log(response.data.borrow);
         setBookBorrows(response.data.borrow);
       } catch (error) {
         console.error("Error fetching borrows:", error);
@@ -58,27 +56,36 @@ const BorrowedPage: React.FC<BorrowedPageProps> = ({ params }) => {
   }, [id]);
 
   if (!id) {
-    return <div>No book ID provided.</div>;
+    // center the text
+    return (
+      <div className="text-red-500 flex justify-center items-center h-96">
+        No book ID provided.
+      </div>
+    );
   }
 
   if (bookBorrows.length === 0) {
-    return <div>No borrow records found for this book.</div>;
+    return (
+      // tengahin text pake align center gimana sih biar di tengah page
+      <div className="flex justify-center items-center h-96">
+        No borrow records found for this book.
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1>Borrowed Books</h1>
+    <main className="p-8 mx-auto max-w-7xl">
+      <h1 className="text-2xl font-bold mb-4">Borrowed Books</h1>
       <ExportLendingButton />
       <ul>
         {bookBorrows.map((borrow) => (
           <li key={borrow.id} className="border p-4 my-4">
-            <h2>{borrow.book.title}</h2>
-            <p>Borrowed by: {borrow.user.username}</p>
-            <p>
+            <h2 className="text-xl font-semibold mb-2">{borrow.book.title}</h2>
+            <p className="text-gray-400">Borrowed by: {borrow.user.username}</p>
+            <p className="text-gray-400">
               Borrowed at: {new Date(borrow.lendingAt).toLocaleDateString()}
             </p>
-            {/* check if return is null then not return yet */}
-            <p>
+            <p className="text-gray-400">
               Return at:{" "}
               {borrow.returnAt
                 ? new Date(borrow.returnAt).toLocaleDateString()
@@ -104,6 +111,7 @@ const BorrowedPage: React.FC<BorrowedPageProps> = ({ params }) => {
                   }
                 }}
                 variant="outline"
+                className="mt-2"
               >
                 Return
               </Button>
@@ -111,7 +119,7 @@ const BorrowedPage: React.FC<BorrowedPageProps> = ({ params }) => {
           </li>
         ))}
       </ul>
-    </div>
+    </main>
   );
 };
 
